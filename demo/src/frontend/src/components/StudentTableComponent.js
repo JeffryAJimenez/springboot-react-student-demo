@@ -1,24 +1,17 @@
 import {useState, useEffect} from 'react';
-import { Layout, Menu, Breadcrumb, Table, Spin, Empty, Button, Badge, Tag, Avatar, Radio, Popconfirm} from 'antd';
+import { Table, Spin, Empty, Button, Badge, Tag, Avatar, Radio, Popconfirm} from 'antd';
 import {
-  DesktopOutlined,
-  PieChartOutlined,
-  FileOutlined,
-  TeamOutlined,
   UserOutlined,
   LoadingOutlined,
   PlusOutlined
 } from '@ant-design/icons';
 
-import './App.css';
-import StudentDrawerForm from "./components/forms/StudentDrawerForm";
-import {successNotification, errorNotification} from "./components/notifications/Notification"
+import '../App.css'
+
+import { getAllStudents, deleteStudent} from "../clients/client";
+import { errorNotification, successNotification } from './notifications/Notification';
 
 
-import { getAllStudents, deleteStudent} from "./clients/client";
-
-const { Header, Content, Footer, Sider } = Layout;
-const { SubMenu } = Menu;
 const TheAvatar = ({name}) => {
     let trim = name.trim();
     if(trim.length === 0){
@@ -35,7 +28,7 @@ const TheAvatar = ({name}) => {
     return <Avatar>{`${name.charAt(0)}${name.charAt(name.length - 1)}`}</Avatar>
 }
 
-const removeStudent = (studentId, callback) => {
+const removeStudent = (studentId, callback, successNotification, errorNotification) => {
     deleteStudent(studentId).then(() => {
         successNotification("Student Deleted", `Student with id ${studentId} removed`);
         callback();
@@ -53,7 +46,7 @@ const removeStudent = (studentId, callback) => {
     })
 }
 
-const columns = fetchStudents => [
+const columns = (fetchStudents, successNotification, errorNotification) => [
       {
         title: '',
         dataIndex: 'avatar',
@@ -88,7 +81,7 @@ const columns = fetchStudents => [
                 <Popconfirm
                     placement='topRight'
                     title={`Are you sure to delete ${student.name}`}
-                    onConfirm={() => removeStudent(student.id, fetchStudents)}
+                    onConfirm={() => removeStudent(student.id, fetchStudents, successNotification, errorNotification)}
                     okText='Yes'
                     cancelText='No'
                 >
@@ -106,10 +99,9 @@ const columns = fetchStudents => [
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
 
-function App() {
+function StudentTableComponent( {successNotification, errorNotification, studentDrawerForm} ) {
 
     const [students, setStudent] = useState([]);
-    const [collapsed, setCollapsed] = useState(false);
     const [fetching, setFetching] = useState(true);
     const [showDrawer, setShowDrawer] = useState(false);
 
@@ -141,7 +133,7 @@ function App() {
 
     }, []);
 
-    const renderStudents = () => {
+    const renderStudents = (StudentDrawerForm) => {
         if(fetching){
             return <Spin indicator={antIcon} />
         }
@@ -168,7 +160,7 @@ function App() {
                 fetchStudents={fetchStudents}/>
             <Table
                 dataSource={students}
-                columns={columns(fetchStudents)}
+                columns={columns(fetchStudents, successNotification, errorNotification)}
                 bordered
                 title={() =>
                     <>
@@ -194,44 +186,8 @@ function App() {
 
     }
 
-    return <Layout style={{ minHeight: '100vh' }}>
-            <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed}>
-              <div className="logo" />
-              <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline">
-                <Menu.Item key="1" icon={<PieChartOutlined />}>
-                  Option 1
-                </Menu.Item>
-                <Menu.Item key="2" icon={<DesktopOutlined />}>
-                  Option 2
-                </Menu.Item>
-                <SubMenu key="sub1" icon={<UserOutlined />} title="User">
-                  <Menu.Item key="3">Tom</Menu.Item>
-                  <Menu.Item key="4">Bill</Menu.Item>
-                  <Menu.Item key="5">Alex</Menu.Item>
-                </SubMenu>
-                <SubMenu key="sub2" icon={<TeamOutlined />} title="Team">
-                  <Menu.Item key="6">Team 1</Menu.Item>
-                  <Menu.Item key="8">Team 2</Menu.Item>
-                </SubMenu>
-                <Menu.Item key="9" icon={<FileOutlined />}>
-                  Files
-                </Menu.Item>
-              </Menu>
-            </Sider>
-            <Layout className="site-layout">
-              <Header className="site-layout-background" style={{ padding: 0 }} />
-              <Content style={{ margin: '0 16px' }}>
-                <Breadcrumb style={{ margin: '16px 0' }}>
-                  <Breadcrumb.Item>User</Breadcrumb.Item>
-                  <Breadcrumb.Item>Bill</Breadcrumb.Item>
-                </Breadcrumb>
-                <div className="site-layout-background" style={{ padding: 24, minHeight: 360 }}>
-                  {renderStudents()}
-                </div>
-              </Content>
-              <Footer style={{ textAlign: 'center' }}>By Jeffry Jimenez </Footer>
-            </Layout>
-          </Layout>
+    return renderStudents(studentDrawerForm);
+               
 }
 
-export default App;
+export default StudentTableComponent;
