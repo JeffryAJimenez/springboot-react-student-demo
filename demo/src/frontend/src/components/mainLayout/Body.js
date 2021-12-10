@@ -2,6 +2,7 @@ import { Route, Switch} from "react-router-dom"
 import { Layout, Breadcrumb} from 'antd';
 
 import StudentTableComponent from '../StudentTableComponent';
+import UserTableComponent from "../UserTableComponent";
 
 import '../../App.css';
 
@@ -31,8 +32,15 @@ function Body( {successNotification, errorNotification, studentDrawerForm} ) {
                           </Route>
 
 
-                          <Route path="/test" 
-                          component={() => <div> Hello World</div>} />
+                          <Route 
+                            exact path="/test" 
+                            component={() => <UserTableComponent
+                                successNotification={successNotification} 
+                                errorNotification={errorNotification} 
+                                />
+                            }>
+                            
+                          </Route>
 
                           
                       
